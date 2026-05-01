@@ -9,8 +9,8 @@ const client = new Client({
   ]
 });
 
-// 🔐 管理者ID（自分のDiscord ID入れる）
-const ADMIN_ID = "YOUR_DISCORD_ID";
+// 👑 管理ロール名（ここ変更）
+const ADMIN_ROLE_NAME = "Admin";
 
 // 📂 データ読み込み
 let market = {};
@@ -20,7 +20,7 @@ if (fs.existsSync(filePath)) {
   market = JSON.parse(fs.readFileSync(filePath));
 }
 
-// 💾 保存関数
+// 💾 保存
 function saveData() {
   fs.writeFileSync(filePath, JSON.stringify(market, null, 2));
 }
@@ -28,7 +28,7 @@ function saveData() {
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
-  // 📊 価格確認
+  // 📊 価格取得
   if (message.content.startsWith("!price")) {
     const name = message.content.replace("!price", "").trim();
 
@@ -43,10 +43,10 @@ client.on("messageCreate", (message) => {
     return message.reply(`${name} = ${value}`);
   }
 
-  // ➕ 追加（管理者のみ）
+  // ➕ 追加（ロール制限）
   if (message.content.startsWith("!add")) {
-    if (message.author.id !== ADMIN_ID) {
-      return message.reply("You are not admin");
+    if (!message.member.roles.cache.some(r => r.name === ADMIN_ROLE_NAME)) {
+      return message.reply("No permission");
     }
 
     const args = message.content.replace("!add", "").trim().split(" ");
