@@ -8,26 +8,48 @@ const client = new Client({
   ]
 });
 
-// 🔽 最初は空（完全登録制）
+// 完全登録制（最初は空）
 const market = {};
 
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
-  if (message.content.startsWith("!相場")) {
-    const name = message.content.replace("!相場", "").trim();
+  // 📊 GET PRICE
+  if (message.content.startsWith("!price")) {
+    const name = message.content.replace("!price", "").trim();
 
-    if (!name) return message.reply("使い方：!相場 名前");
+    if (!name) {
+      return message.reply("Usage: !price <item name>");
+    }
 
     const value = market[name];
 
     if (value === undefined) {
-      return message.reply("未登録");
+      return message.reply("Not registered");
     }
 
-    message.reply(`${name} = ${value}`);
+    return message.reply(`${name} = ${value}`);
+  }
+
+  // ➕ ADD ITEM
+  if (message.content.startsWith("!add")) {
+    const args = message.content.replace("!add", "").trim().split(" ");
+
+    if (args.length < 2) {
+      return message.reply("Usage: !add <name> <value>");
+    }
+
+    const name = args[0];
+    const value = parseFloat(args[1]);
+
+    if (isNaN(value)) {
+      return message.reply("Value must be a number");
+    }
+
+    market[name] = value;
+
+    return message.reply(`Added: ${name} = ${value}`);
   }
 });
 
 client.login(process.env.TOKEN);
-
